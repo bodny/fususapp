@@ -1,0 +1,23 @@
+# This is a sample build configuration for PHP.
+# Check our guides at https://confluence.atlassian.com/x/e8YWN for more examples.
+# Only use spaces to indent your .yml configuration.
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+image: lorisleiva/laravel-docker:latest
+
+pipelines:
+  default:
+    - step:
+        name: deploy
+        caches:
+          - composer
+          - node
+        script:
+          - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+          - cp .env.example .env
+          - php artisan key:generate
+          - npm install
+          - npm run production
+          - pwd
+          - ls -al
+          - php artisan deploy fususapp.bodny.net -s upload

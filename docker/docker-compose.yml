@@ -1,0 +1,126 @@
+version: '3'
+
+services:
+  app:
+    image: bodny/php-laravel:php74
+    container_name: fususapp_app
+    expose:
+      - "80"
+    ports:
+      - "127.0.51.2:80:80"
+    volumes:
+      - ../:/var/www/html
+    depends_on:
+      - db
+    networks:
+      net:
+        ipv4_address: 172.16.51.2
+    domainname: test
+    hostname: fususapp
+    restart: unless-stopped
+    extra_hosts:
+      - "fususapp.test:172.16.51.2"
+      - "db.fususapp.test:172.16.51.3"
+      - "adminer.fususapp.test:172.16.51.4"
+      - "pma.fususapp.test:172.16.51.5"
+      - "mc.fususapp.test:172.16.51.6"
+  db:
+    image: mariadb:10.5
+    container_name: fususapp_db
+    expose:
+      - "3306"
+    ports:
+      - "127.0.51.3:3306:3306"
+    volumes:
+      - data_db:/var/lib/mysql
+    networks:
+      net:
+        ipv4_address: 172.16.51.3
+    domainname: fususapp.test
+    hostname: db
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: pass4you
+      MYSQL_DATABASE: fususapp
+      MYSQL_USER: fususapp
+      MYSQL_PASSWORD: nbusr123
+    extra_hosts:
+      - "fususapp.test:172.16.51.2"
+      - "db.fususapp.test:172.16.51.3"
+      - "adminer.fususapp.test:172.16.51.4"
+      - "pma.fususapp.test:172.16.51.5"
+      - "mc.fususapp.test:172.16.51.6"
+  adminer:
+    image: adminer
+    container_name: fususapp_adminer
+    expose:
+      - "80"
+    ports:
+      - "127.0.51.4:80:8080"
+    networks:
+      net:
+        ipv4_address: 172.16.51.4
+    domainname: fususapp.test
+    hostname: adminer
+    restart: unless-stopped
+    extra_hosts:
+      - "fususapp.test:172.16.51.2"
+      - "db.fususapp.test:172.16.51.3"
+      - "adminer.fususapp.test:172.16.51.4"
+      - "pma.fususapp.test:172.16.51.5"
+      - "mc.fususapp.test:172.16.51.6"
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: fususapp_pma
+    expose:
+      - "80"
+    ports:
+      - "127.0.51.5:80:80"
+    volumes:
+      - /sessions
+    networks:
+      net:
+        ipv4_address: 172.16.51.5
+    domainname: fususapp.test
+    hostname: pma
+    restart: unless-stopped
+    extra_hosts:
+      - "fususapp.test:172.16.51.2"
+      - "db.fususapp.test:172.16.51.3"
+      - "adminer.fususapp.test:172.16.51.4"
+      - "pma.fususapp.test:172.16.51.5"
+      - "mc.fususapp.test:172.16.51.6"
+  mc:
+    image: tophfr/mailcatcher
+    container_name: fususapp_mc
+    expose:
+      - "80"
+      - "25"
+    ports:
+      - "127.0.51.6:80:80"
+      - "127.0.51.6:25:25"
+    networks:
+      net:
+        ipv4_address: 172.16.51.6
+    domainname: fususapp.test
+    hostname: mc
+    restart: unless-stopped
+    extra_hosts:
+      - "fususapp.test:172.16.51.2"
+      - "db.fususapp.test:172.16.51.3"
+      - "adminer.fususapp.test:172.16.51.4"
+      - "pma.fususapp.test:172.16.51.5"
+      - "mc.fususapp.test:172.16.51.6"
+
+volumes:
+  data_db:
+
+networks:
+  net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: 172.16.51.0/24
